@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Social Library 📚</title>
+    <style>
+        /* Base Themes */
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --accent-color: #ff9f43;
+            --border-color: #333333;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f5f6fa;
+            --card-bg: #ffffff;
+            --text-color: #2f3640;
+            --accent-color: #e67e22;
+            --border-color: #dcdde1;
+        }
+
+        [data-theme="sepia"] {
+            --bg-color: #f4ecd8;
+            --card-bg: #fdf6e3;
+            --text-color: #5b4636;
+            --accent-color: #b58900;
+            --border-color: #e4d4b2;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1000px;
+            margin: 0 auto 30px auto;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .theme-selector button {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .theme-selector button:hover {
+            border-color: var(--accent-color);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 { color: var(--accent-color); margin-top: 0; }
+
+        /* Profile Styles */
+        .profile-view { text-align: center; }
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: var(--accent-color);
+            color: #121212;
+            font-size: 2rem;
+            line-height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px auto;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0 20px 0;
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        button.primary {
+            background: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button.primary:hover { opacity: 0.9; }
+
+        /* Library Grid */
+        .book-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .book-item {
+            background: var(--bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-reading { background: #2ecc71; color: #fff; }
+        .status-completed { background: #3498db; color: #fff; }
+        .status-plan { background: #95a5a6; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>📚 Club Library</h1>
+        <div class="theme-selector">
+            <button onclick="setTheme('dark')">🌙 Dark</button>
+            <button onclick="setTheme('light')">☀️ Light</button>
+            <button onclick="setTheme('sepia')">📜 Sepia</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Profile Customization Sidebar -->
+        <div class="card">
+            <h2>Your Profile</h2>
+            <div class="profile-view">
+                <div class="avatar" id="avatarIcon">👤</div>
+                <label>Display Name:</label>
+                <input type="text" id="username" value="BookWorm" onchange="updateProfile()">
+                
+                <label>Status:</label>
+                <input type="text" id="bio" value="Reading 24/7" onchange="updateProfile()">
+            </div>
+        </div>
+
+        <!-- Book Feed / Interaction Panel -->
+        <div class="card">
+            <h2>Share & Track a Book</h2>
+            <form id="bookForm" onsubmit="addBook(event)">
+                <label>Book Title:</label>
+                <input type="text" id="bookTitle" placeholder="e.g., Percy Jackson" required>
+
+                <label>Your Reading Status:</label>
+                <select id="bookStatus">
+                    <option value="reading">📖 Currently Reading</option>
+                    <option value="completed">✅ Completed</option>
+                    <option value="plan">⏳ Plan to Read</option>
+                </select>
+
+                <button type="submit" class="primary">Add to Shared Feed</button>
+            </form>
+
+            <h2>Shared Library Feed</h2>
+            <div class="book-list" id="feedContainer">
+                <!-- Books will appear here live -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State & LocalStorage Logic
+        let profile = JSON.parse(localStorage.getItem('lib_profile')) || { name: "BookWorm", bio: "Reading 24/7", theme: "dark" };
+        let books = JSON.parse(localStorage.getItem('lib_books')) || [];
+
+        function init() {
+            document.getElementById('username').value = profile.name;
+            document.getElementById('bio').value = profile.bio;
+            setTheme(profile.theme);
+            renderFeed();
+        }
+
+        function setTheme(themeName) {
+            document.documentElement.setAttribute('data-theme', themeName);
+            profile.theme = themeName;
+            save();
+        }
+
+        function updateProfile() {
+            profile.name = document.getElementById('username').value;
+            profile.bio = document.getElementById('bio').value;
+            document.getElementById('avatarIcon').innerText = profile.name.charAt(0).toUpperCase();
+            save();
+            renderFeed();
+        }
+
+        function addBook(e) {
+            e.preventDefault();
+            const title = document.getElementById('bookTitle').value;
+            const status = document.getElementById('bookStatus').value;
+            
+            const newBook = {
+                user: profile.name,
+                title: title,
+                status: status,
+                timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            };
+
+            books.unshift(newBook);
+            document.getElementById('bookForm').reset();
+            save();
+            renderFeed();
+        }
+
+        function renderFeed() {
+            const container = document.getElementById('feedContainer');
+            if (books.length === 0) {
+                container.innerHTML = `<p style="color: gray; text-align: center;">No books shared yet. Be the first!</p>`;
+                return;
+            }
+
+            container.innerHTML = books.map(book => `
+                <div class="book-item">
+                    <div>
+                        <strong>${book.title}</strong><br>
+                        <span style="font-size: 0.85rem; color: var(--accent-color);">Shared by ${book.user} at ${book.timestamp}</span>
+                    </div>
+                    <span class="status-badge status-${book.status}">${book.status.toUpperCase()}</span>
+                </div>
+            `).join('');
+        }
+
+        function save() {
+            localStorage.setItem('lib_profile', JSON.stringify(profile));
+            localStorage.setItem('lib_books', JSON.stringify(books));
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
