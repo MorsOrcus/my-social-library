@@ -273,3 +273,130 @@
     </script>
 </body>
 </html>
+<body>
+
+    <header>
+        <h1>📚 Orcus Library Hub</h1>
+        <div class="theme-selector">
+            <button onclick="setTheme('dark')">🌙 Dark</button>
+            <button onclick="setTheme('light')">☀️ Light</button>
+            <button onclick="setTheme('sepia')">📜 Sepia</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div>
+            <div class="card">
+                <h2>Profile</h2>
+                <div class="profile-view">
+                    <div class="avatar" id="avatarIcon">👤</div>
+                    <label>Your Name:</label>
+                    <input type="text" id="username" value="Reader" onchange="updateProfile()">
+                    <label>Custom Bio:</label>
+                    <input type="text" id="bio" value="Orcus Member" onchange="updateProfile()">
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Activity Feed</h2>
+                <div class="book-list" id="feedContainer"></div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card">
+                <h2>Available Bookshelf</h2>
+                <div class="catalog-grid">
+                    <div class="book-shelf-item">
+                        <h3>Sherlock Holmes</h3>
+                        <p>Arthur Conan Doyle</p>
+                        <button class="read-btn" onclick="openBook('Sherlock Holmes', 'https://gutenberg.org')">📖 Read Now</button>
+                    </div>
+                    <div class="book-shelf-item">
+                        <h3>Frankenstein</h3>
+                        <p>Mary Shelley</p>
+                        <button class="read-btn" onclick="openBook('Frankenstein', 'https://gutenberg.org')">📖 Read Now</button>
+                    </div>
+                    <div class="book-shelf-item">
+                        <h3>Alice in Wonderland</h3>
+                        <p>Lewis Carroll</p>
+                        <button class="read-btn" onclick="openBook('Alice in Wonderland', 'https://gutenberg.org')">📖 Read Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="reader-container" id="readerOverlay">
+        <div class="reader-header">
+            <h2 id="currentReadingTitle" style="margin: 0;">Reading Mode</h2>
+            <button class="close-reader" onclick="closeBook()">❌ Close Book</button>
+        </div>
+        <iframe class="reader-frame" id="bookIframe" src=""></iframe>
+    </div>
+
+    <script>
+        let profile = JSON.parse(localStorage.getItem('orcus_profile')) || { name: "Reader", bio: "Orcus Member", theme: "dark" };
+        let historyFeed = JSON.parse(localStorage.getItem('orcus_feed')) || [];
+
+        function init() {
+            document.getElementById('username').value = profile.name;
+            document.getElementById('bio').value = profile.bio;
+            setTheme(profile.theme);
+            renderFeed();
+        }
+
+        function setTheme(themeName) {
+            document.documentElement.setAttribute('data-theme', themeName);
+            profile.theme = themeName;
+            localStorage.setItem('orcus_profile', JSON.stringify(profile));
+        }
+
+        function updateProfile() {
+            profile.name = document.getElementById('username').value;
+            profile.bio = document.getElementById('bio').value;
+            document.getElementById('avatarIcon').innerText = profile.name.charAt(0).toUpperCase();
+            localStorage.setItem('orcus_profile', JSON.stringify(profile));
+        }
+
+        function openBook(title, url) {
+            document.getElementById('currentReadingTitle').innerText = `Reading: ${title}`;
+            document.getElementById('bookIframe').src = url;
+            document.getElementById('readerOverlay').style.display = 'flex';
+
+            const log = {
+                user: profile.name,
+                title: title,
+                timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            };
+            historyFeed.unshift(log);
+            localStorage.setItem('orcus_feed', JSON.stringify(historyFeed));
+            renderFeed();
+        }
+
+        function closeBook() {
+            document.getElementById('readerOverlay').style.display = 'none';
+            document.getElementById('bookIframe').src = "";
+        }
+
+        function renderFeed() {
+            const container = document.getElementById('feedContainer');
+            if (historyFeed.length === 0) {
+                container.innerHTML = `<p style="color: gray; text-align: center; font-size: 0.9rem;">No reading activity yet.</p>`;
+                return;
+            }
+            container.innerHTML = historyFeed.slice(0, 5).map(item => `
+                <div class="book-item">
+                    <div style="font-size: 0.85rem;">
+                        <strong>${item.user}</strong> opened <span style="color:var(--accent-color);">${item.title}</span>
+                        <br><span style="color: gray; font-size: 0.75rem;">${item.timestamp}</span>
+                    </div>
+                    <span class="status-badge status-reading">READING</span>
+                </div>
+            `).join('');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
